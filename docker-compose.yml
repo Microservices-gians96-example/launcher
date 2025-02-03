@@ -41,8 +41,9 @@ services:
       - PORT=3000
       - NATS_SERVERS=nats://nats-server:4222 ## Dentro del container se crea un DNS con el nombre nats-server, la cual apunta a la IP del host nats-server
       - DATABASE_URL=postgresql://postgres:123456@orders-db:5432/ordersdb?schema=public
-
-  #Orders DB
+  # ==================
+  # Orders DB
+  # ==================
   orders-db:
     container_name: orders_database
     image: postgres:16.2
@@ -74,3 +75,37 @@ services:
       - STRIPE_ENDPOINT_SECRET=${STRIPE_ENDPOINT_SECRET}
     ports:
       - ${PAYMENTS_MS_PORT}:${PAYMENTS_MS_PORT}
+
+  # ==================
+  # Auth DB
+  # ==================
+
+  # auth-db:
+  #   container_name: auth_database
+  #   image: mongo:7.0
+  #   restart: always
+  #   volumes:
+  #     - ./auth-ms/mongo:/var/lib/mongo/data
+  #   ports:
+  #     - 27017:27017
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=root
+  #     - MONGO_INITDB_ROOT_PASSWORD=123456
+  #     - MONGO_INITDB_DATABASE=authdb
+
+  # ==================
+  # Auth MS
+  # ==================
+  auth-ms:
+    build: ./auth-ms
+    volumes:
+      - ./auth-ms/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=3000
+      - NATS_SERVERS=nats://nats-server:4222 ## Dentro del container se crea un DNS con el nombre nats-server, la cual apunta a la IP del host nats-server
+      - DATABASE_URL=${AUTH_DATABASE_URL}
+      
+
+
+  
